@@ -30,16 +30,19 @@ fn read_file_to_lines(path: &str) -> Vec<String> {
     result
 }
 
-fn count_dial_at_zero_occurrences(dial_rotations: &Vec<Rotation>) -> u32 {
+fn count_dial_at_zero_occurrences(dial_rotations: &mut Vec<Rotation>) -> u32 {
     let mut occurrences: u32 = 0;
     let mut position: i32 = 50;
     const MAX_NUM: i32 = 100;
     for rotation in dial_rotations {
-        position =
-            ((position + get_rotation_direction_and_click_count(rotation)) + MAX_NUM) % MAX_NUM;
-        if position == 0 {
+        occurrences += (rotation.power / MAX_NUM) as u32;
+        rotation.power %= MAX_NUM;
+        let tmp = position + get_rotation_direction_and_click_count(rotation);
+        if tmp <= 0 && position != 0 {
             occurrences += 1;
         }
+        occurrences += (tmp / MAX_NUM) as u32;
+        position = (tmp + MAX_NUM) % MAX_NUM;
     }
     occurrences
 }
@@ -65,9 +68,8 @@ fn lines_to_rotations(file_lines: &mut Vec<String>) -> Vec<Rotation> {
 }
 
 fn main() {
-    println!("Hello, world!");
     let file_content = &mut read_file_to_lines("input.txt");
-    let rotations = lines_to_rotations(file_content);
-    let pswd = count_dial_at_zero_occurrences(&rotations);
+    let mut rotations = lines_to_rotations(file_content);
+    let pswd = count_dial_at_zero_occurrences(&mut rotations);
     println!("{pswd}")
 }
