@@ -1,5 +1,4 @@
-use std::fs::read_to_string;
-
+use util::read_file_to_lines;
 #[derive(Debug)]
 enum Direction {
     LEFT,
@@ -19,15 +18,6 @@ impl Direction {
 struct Rotation {
     direction: Direction,
     power: i32,
-}
-
-fn read_file_to_lines(path: &str) -> Vec<String> {
-    let mut result: Vec<String> = Vec::with_capacity(100);
-    let content = read_to_string(path).expect("where input brotha");
-    content
-        .lines()
-        .for_each(|line| result.push(String::from(line)));
-    result
 }
 
 fn count_dial_at_zero_occurrences(dial_rotations: &mut Vec<Rotation>) -> u32 {
