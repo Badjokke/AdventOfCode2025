@@ -13,20 +13,40 @@ fn collect_intervals(intervals: Vec<String>) -> Vec<Interval> {
     }
     result
 }
+
 fn is_invalid_id(id: i64) -> bool {
     let tmp = id.to_string();
-    if tmp.len() % 2 != 0 {
+    let mut window: Vec<u8> = vec![];
+    let digit_bytes = tmp.as_bytes();
+    window.push(digit_bytes[0]);
+    for i in 0..tmp.len() / 2 {
+        if is_window_sequence(&window, digit_bytes, i + 1) {
+            return true;
+        }
+        window.push(digit_bytes[i + 1]);
+    }
+    return false;
+}
+
+fn is_window_sequence(window: &Vec<u8>, digit: &[u8], start_index: usize) -> bool {
+    let mut walker = 0;
+    let window_size = window.len();
+    if window_size % 2 == 0 && digit.len() % 2 != 0 {
         return false;
     }
-    let halves = tmp.split_at(tmp.len() / 2);
-    println!("Halves: {:?}", halves);
-    return halves.0 == halves.1;
+    for i in start_index..digit.len() {
+        if window[walker] != digit[i] {
+            return false;
+        }
+        walker = (walker + 1) % window_size;
+    }
+    return walker == 0;
 }
 
 fn find_all_invalid_pairs(intervals: &Vec<Interval>) -> Vec<i64> {
     let mut result = vec![];
     for interval in intervals {
-        for i in interval.0..interval.1 {
+        for i in interval.0..interval.1 + 1 {
             if !is_invalid_id(i) {
                 continue;
             }
@@ -35,6 +55,7 @@ fn find_all_invalid_pairs(intervals: &Vec<Interval>) -> Vec<i64> {
     }
     result
 }
+
 fn main() {
     let intervals = collect_intervals(read_file_delimited("input.txt", ","));
     let invalid_ids = find_all_invalid_pairs(&intervals);
