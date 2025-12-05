@@ -24,29 +24,31 @@ fn find_max_num_in_bank(bank: &Vec<u32>, starting_index: usize, end_index: usize
     }
     Pair(index, max)
 }
-fn resolve_pair_value(first: &Pair, second: &Pair) -> u16 {
-    if first.0 < second.0 {
-        return (10 * first.1 + second.1) as u16;
-    }
-    return (10 * second.1 + first.1) as u16;
-}
-fn find_pairs_in_banks(banks: Vec<Vec<u32>>) -> u16 {
-    let mut sum: u16 = 0;
-    for bank in banks {
-        let mut starting_index: usize = 0;
-        let mut end_index: usize = bank.len();
 
-        let first_max = find_max_num_in_bank(&bank, starting_index, end_index);
-        if first_max.0 == end_index - 1 {
-            end_index -= 1;
-        } else {
-            starting_index = first_max.0 + 1;
+fn resolve_pair_value(pair: &Pair, battery_position: u32) -> u64 {
+    (10 as u64).pow(battery_position - 1) * pair.1 as u64
+}
+
+fn find_pairs_in_banks(banks: Vec<Vec<u32>>) -> u64 {
+    let mut sum: u64 = 0;
+    const BATTERIES_NEEDED: u16 = 12;
+
+    for bank in banks {
+        let mut batteries_acq: u16 = 0;
+        let element_count = (bank.len() + 1) as u16;
+        let mut i: u16 = 0;
+        while batteries_acq != BATTERIES_NEEDED {
+            let batteries_left = BATTERIES_NEEDED - batteries_acq;
+            let j = element_count - (i as u16) - batteries_left;
+            let pair = find_max_num_in_bank(&bank, i as usize, (j + i) as usize);
+            i = pair.0 as u16 + 1;
+            batteries_acq += 1;
+            sum += resolve_pair_value(&pair, batteries_left as u32);
         }
-        let second_max = find_max_num_in_bank(&bank, starting_index, end_index);
-        sum += resolve_pair_value(&first_max, &second_max)
     }
     return sum;
 }
+
 fn main() {
     let lines = read_file_to_lines("input.txt");
     let sum = find_pairs_in_banks(string_banks_to_int(lines));
